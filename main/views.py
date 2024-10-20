@@ -5,10 +5,10 @@ from django.views import View
 
 class Index(View):
     def get(self, request):
-        return render(request, 'index.html')
+        return render(request, 'main/index.html')
 
     def post(self, request):
-        return render(request, 'index.html')
+        return render(request, 'main/index.html')
 
 
 class TicketPage(View):
@@ -28,9 +28,9 @@ class TicketPage(View):
 
 class SignUp(View):
     def get(self, request):
-        return render(request, 'signup.html')
+        return render(request, 'main/signup.html')
 
 
 class Login(View):
     def get(self, request):
-        return render(request, 'login.html')
+        return render(request, 'main/login.html')

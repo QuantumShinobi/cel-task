@@ -1,0 +1,62 @@
+{% load static %}
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}{% endblock title %}</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-gray-100 font-sans">
+    <nav class="bg-white shadow-lg">
+        <div class="max-w-6xl mx-auto px-4">
+            <div class="flex justify-between">
+                <div class="flex space-x-7">
+                    <div>
+                        <a href="#" class="flex items-center py-4 px-2">
+                            <span class="font-semibold text-gray-500 text-lg">The Entrepreneurial Summit 2025</span>
+                        </a>
+                    </div>
+                </div>
+                <div class="hidden md:flex items-center space-x-3">
+                    <a href="#" class="py-2 px-2 font-medium text-gray-500 hover:text-gray-900">Home</a>
+                    <a href="#about" class="py-2 px-2 font-medium text-gray-500 hover:text-gray-900">About</a>
+                    <a href="#sponsors" class="py-2 px-2 font-medium text-gray-500 hover:text-gray-900">Sponsors</a>
+                    <a href="#partners" class="py-2 px-2 font-medium text-gray-500 hover:text-gray-900">Partners</a>
+                    <a href="#panelists" class="py-2 px-2 font-medium text-gray-500 hover:text-gray-900">Panelists</a>
+                    <a href="/signup" class="py-2 px-4 font-medium text-white bg-green-500 rounded hover:bg-green-400 transition duration-300">Sign Up</a>
+                </div>
+                <div class="md:hidden flex items-center">
+                    <button class="outline-none mobile-menu-button">
+                        <svg class="w-6 h-6 text-gray-500 hover:text-green-500"
+                            x-show="!showMenu"
+                            fill="none"
+                            stroke-linecap="round"
+                            stroke-linejoin="round"
+                            stroke-width="2"
+                            viewBox="0 0 24 24"
+                            stroke="currentColor"
+                        >
+                            <path d="M4 6h16M4 12h16M4 18h16"></path>
+                        </svg>
+                    </button>
+                </div>
+            </div>
+        </div>
+        <div class="hidden mobile-menu">
+            <ul class="">
+                <li><a href="#" class="block text-sm px-2 py-4 hover:bg-green-500 transition duration-300">Home</a></li>
+                <li><a href="#about" class="block text-sm px-2 py-4 hover:bg-green-500 transition duration-300">About</a></li>
+                <li><a href="#sponsors" class="block text-sm px-2 py-4 hover:bg-green-500 transition duration-300">Sponsors</a></li>
+                <li><a href="#partners" class="block text-sm px-2 py-4 hover:bg-green-500 transition duration-300">Partners</a></li>
+                <li><a href="#panelists" class="block text-sm px-2 py-4 hover:bg-green-500 transition duration-300">Panelists</a></li>
+                <li><a href="/signup" class="block text-sm px-2 py-4 text-white bg-green-500 hover:bg-green-400 transition duration-300">Sign Up</a></li>
+            </ul>
+        </div>
+    </nav>
+ <div className="h-[50rem] w-full dark:bg-black bg-white  dark:bg-grid-white/[0.2] bg-grid-black/[0.2] relative flex items-center justify-center">
+      <div className="absolute pointer-events-none inset-0 flex items-center justify-center dark:bg-black bg-white [mask-image:radial-gradient(ellipse_at_center,transparent_20%,black)]"></div>
+    
+    {% block body %}{% endblock body %}
+ </div>
+</body>
+</html>

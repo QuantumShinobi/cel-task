@@ -3,10 +3,10 @@ import uuid
 import bcrypt
 from django.shortcuts import render, redirect
 import json
+from datetime import datetime, timezone
 
 
 class User(models.Model):
-    username = models.CharField(max_length=25, unique=True)
     password = models.BinaryField(editable=True)
     name = models.CharField(max_length=200, null=True)
     email = models.EmailField(null=True)
@@ -15,10 +15,6 @@ class User(models.Model):
         unique=True, default=uuid.uuid4, editable=False)
     no_of_tickets = models.IntegerField(default=0)
     ticket_id = models.UUIDField(default=uuid.uuid4, editable=False)
-    warned_email = models.BooleanField(default=False, editable=True)
-
-    def __str__(self):
-        return self.username
 
     def authenticate(self, pwd, request, bot=False):
         if bot is False:
@@ -45,19 +41,6 @@ class User(models.Model):
         elif bot is True:
             return bcrypt.checkpw(bytes(pwd, 'utf-8'), self.password)
 
-    def transaction(self, new_transaction_created):
-        jsonDec = json.decoder.JSONDecoder()
-        try:
-            current_list = jsonDec.decode(self.transaction_list)
-        except (TypeError, json.decoder.JSONDecodeError):
-            current_list = []
-
-        current_list.append(str(new_transaction_created.transaction_id))
-        self.transaction_list = json.dumps(current_list)
-        self.save()
-        new_transaction_created.save()
-        return True
-
     @staticmethod
     def get_user(request):
         try:
@@ -76,38 +59,6 @@ class User(models.Model):
             else:
                 return user
 
-    def get_friends(self):
-        jsonDec = json.decoder.JSONDecoder()
-        friends_list = []
-        try:
-            for id in jsonDec.decode(self.friends_list):
-                frnd = User.objects.get(unique_id=id)
-                friends_list.append(frnd)
-
-            return friends_list
-        except (User.DoesNotExist, TypeError, json.decoder.JSONDecodeError):
-            return None
-
-    def add_friend(self, username):
-        jsonDec = json.decoder.JSONDecoder()
-        friends_list = []
-        try:
-            for id in jsonDec.decode(self.friends_list):
-                friends_list.append(id)
-        except (User.DoesNotExist, TypeError):
-            friends_list = []
-        try:
-            friend = User.objects.get(username=username)
-        except User.DoesNotExist:
-            return False
-        else:
-            if friend.unique_id == self.unique_id:
-                return False
-            friends_list.append(str(friend.unique_id))
-            self.friends_list = json.dumps(list(set(friends_list)))
-            self.save()
-            return True
-
     @staticmethod
     def logout(request):
         try:
@@ -119,3 +70,18 @@ class User(models.Model):
                               context={"title": "Logout", "text": "Logging you out"})
             response.delete_cookie("user-identity")
             return response
+
+
+class Query(models.Model):
+    unique_id = models.UUIDField(
+        unique=True, default=uuid.uuid4, editable=False)
+    unique_id_2 = models.UUIDField(
+        unique=True, default=uuid.uuid4, editable=False)
+    # time_created = models.DateTimeField(default=datetime.now(tz=timezone.utc))
+    time_created = models.DateTimeField(auto_now_add=True)
+
+    mail = models.EmailField()
+    user = models.OneToOneField(User, on_delete=models.CASCADE)
+
+    def __str__(self):
+        return f"ID - {self.unique_id}\n TIME - {self.time_created}"

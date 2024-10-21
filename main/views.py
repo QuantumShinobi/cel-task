@@ -6,7 +6,6 @@ from django.shortcuts import render, redirect
 from django.views import View
 import bcrypt
 from .mail import send__mail, send_verify_mail, check_if_key_is_valid
-# Create your views here.
 
 
 class Index(View):
@@ -20,19 +19,18 @@ class Index(View):
 class TicketPage(View):
     def get(self, request):
         user = User.get_user(request)
-        # print(user.email)
         return render(request, "main/ticket.html", context={"user": user})
-        # return render(request, "main/ticket.html")
 
     def post(self, request):
-        # if cookie is present, then show current ticket, else redirect to signup/login page
-        if 'user_cookie' in request.COOKIES:
-            # Show current ticket
-
-            return render(request, 'ticket.html')
-        else:
-            # Redirect to signup/login page
-            return redirect('signup_login')
+        pass
+        email = request.POST['email']
+        print(email)
+        print
+        password = request.POST['password']
+        if User.objects.filter(email=email).exists():
+            user = User.objects.get(email=email)
+            return user.authenticate(password, request)
+        return render(request, "main/error.html", context={'error': "There is no account associated with this email"})
 
 
 class SignUp(View):
@@ -60,16 +58,14 @@ class SignUp(View):
             password = request.POST['password']
             email = request.POST['email']
             if User.objects.filter(email=email).exists():
-                return render(request, 'main/error.html', context={"error": "Email already exists"})
+                return render(request, 'main/signup.html', context={"error": "Email already exists"})
             else:
                 if len(password) < 8:
-                    return render(request, 'main/error.html', context={"error": "Password must be at least 8 characters long"})
+                    return render(request, 'main/signup.html', context={"error": "Password must be at least 8 characters long"})
             hash_pw = bcrypt.hashpw(password.encode('utf-8'), bcrypt.gensalt())
             name = name.capitalize()
             new_user = User.objects.create(
                 name=name, email=email, password=hash_pw)
-            # response = render(request, 'main/ticket.html',
-            #                   context={"user": new_user})
             response = redirect('main:ticket')
             response.set_cookie("user-identity", str(new_user.unique_id))
             # verifymail(email)
@@ -93,19 +89,20 @@ class Login(View):
         try:
             u_id = request.COOKIES['user-identity']
         except KeyError:
-            username = request.POST['username']
+            email = request.POST['email']
+            print(email)
             password = request.POST['password']
             try:
-                user = User.objects.get(name=username)
+                user = User.objects.get(email=email)
             except User.DoesNotExist:
-                return render(request, 'main/error.html', context={"error": "Username not found"})
+                return render(request, 'main/login.html', context={"error": "Email not found"})
             else:
                 if bcrypt.checkpw(password.encode('utf-8'), user.password):
                     response = redirect('main:ticket')
                     response.set_cookie("user-identity", str(user.unique_id))
                     return response
                 else:
-                    return render(request, 'main/error.html', context={"error": "Password incorrect"})
+                    return render(request, 'main/login.html', context={"error": "Password incorrect"})
         else:
             try:
                 user = User.objects.get(unique_id=u_id)
@@ -125,9 +122,9 @@ class MailView(View):
     @staticmethod
     def post(request):
         check_if_key_is_valid(Query)
-        username = request.POST['username']
+        email = request.POST['email']
         try:
-            user = User.objects.get(username=username)
+            user = User.objects.get(email=email)
         except User.DoesNotExist:
             return redirect(f"http://{request.META['HTTP_HOST']}/mail?invalid=true")
         else:
@@ -160,9 +157,9 @@ class ResetPasswordView(View):
     @staticmethod
     def post(request):
         new_pwd = request.POST['new_password']
-        username = request.POST['username']
+        email = request.POST['email']
         try:
-            user = User.objects.get(username=username)
+            user = User.objects.get(email=email)
         except User.DoesNotExist:
             raise Http404
         else:
@@ -173,7 +170,7 @@ class ResetPasswordView(View):
             try:
                 query = Query.objects.get(user=user)
             except Query.DoesNotExist:
-                return render(request, "error.html", context={'error': "Username not correct"})
+                return render(request, "error.html", context={'error': "email not correct"})
             query.delete()
             return render(request, "mail/done.html")
 
